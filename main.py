@@ -1,3 +1,4 @@
+
 def read_positive_float(prompt):
     """Считывает положительное вещественное число."""
     while True:
@@ -25,7 +26,7 @@ def read_positive_int(prompt):
 
 
 def get_discount_percent(total):
-    """Определяет процент скидки по исходной стоимости покупки."""
+    """Определяет процент скидки."""
     if total >= 15000:
         return 15
     elif total >= 10000:
@@ -36,10 +37,7 @@ def get_discount_percent(total):
 
 
 def amount_to_next_discount(total):
-    """
-    Дополнительный функционал:
-    возвращает сумму, которой не хватает до следующего уровня скидки.
-    """
+    """Определяет сумму до следующего уровня скидки."""
     if total < 5000:
         return 5000 - total, 5
     elif total < 10000:
@@ -56,29 +54,66 @@ def money(value):
 def main():
     print("=== Расчёт стоимости покупки ===")
 
-    product = input("Название товара: ").strip()
-    while not product:
-        print("Ошибка: название товара не должно быть пустым.")
-        product = input("Название товара: ").strip()
+    products = []
 
-    price = read_positive_float("Цена товара: ")
-    quantity = read_positive_int("Количество товара: ")
+    while True:
+        print("\n--- Добавление товара ---")
 
-    original_total = price * quantity
+        product = input("Введите название товара: ").strip()
+
+        while not product:
+            print("Ошибка: название товара не должно быть пустым.")
+            product = input("Введите название товара: ").strip()
+
+        price = read_positive_float("Введите цену: ")
+        quantity = read_positive_int("Введите количество: ")
+
+        product_total = price * quantity
+
+        products.append({
+            "name": product,
+            "price": price,
+            "quantity": quantity,
+            "total": product_total
+        })
+
+        while True:
+            answer = input(
+                "Добавить ещё один товар? (да/нет): "
+            ).strip().lower()
+
+            if answer in ("да", "нет"):
+                break
+
+            print("Ошибка: введите 'да' или 'нет'.")
+
+        if answer == "нет":
+            break
+
+    original_total = sum(item["total"] for item in products)
+
     discount_percent = get_discount_percent(original_total)
     discount_amount = original_total * discount_percent / 100
     final_total = original_total - discount_amount
-    saving_per_item = discount_amount / quantity
 
-    print("\n=== Результат ===")
-    print(f"Товар: {product}")
-    print(f"Исходная стоимость: {money(original_total)} руб.")
-    print(f"Скидка в процентах: {discount_percent}%")
-    print(f"Скидка в рублях: {money(discount_amount)} руб.")
+    print("\n=== Список товаров ===")
+
+    for item in products:
+        print(
+            f"{item['name']}: "
+            f"{money(item['price'])} руб. x "
+            f"{item['quantity']} = "
+            f"{money(item['total'])} руб."
+        )
+
+    print("\n=== Результат покупки ===")
+    print(f"Общая стоимость: {money(original_total)} руб.")
+    print(f"Скидка: {discount_percent}%")
+    print(f"Размер скидки: {money(discount_amount)} руб.")
     print(f"Итоговая стоимость: {money(final_total)} руб.")
-    print(f"Экономия на единицу товара: {money(saving_per_item)} руб.")
 
     remaining, next_percent = amount_to_next_discount(original_total)
+
     if next_percent is not None:
         print(
             f"До скидки {next_percent}% не хватает: "
